@@ -30,7 +30,7 @@ data class NewAuctionItem(
     @field:NotNull(message = "purchasePrice is mandatory")
     var purchasePrice: BigDecimal,
     @field:NotNull(message = "biddingStartingPrice is mandatory")
-    var biddingStartingPrice: BigDecimal
+    var startingPrice: BigDecimal
 )
 
 

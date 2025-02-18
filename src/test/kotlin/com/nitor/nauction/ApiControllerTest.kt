@@ -28,7 +28,7 @@ class ApiControllerTest (
         category = "Phone",
         purchaseDate = LocalDate.of(2023, 2, 13),
         purchasePrice = BigDecimal("1149.00"),
-        biddingStartingPrice = BigDecimal("100.00")
+        startingPrice = BigDecimal("100.00")
     )
 
     private fun postItem(item: NewAuctionItem) =

@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.get
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-class IndexControllerTest(@Autowired private val mvc: MockMvc) {
+class AuctionControllerTest(@Autowired private val mvc: MockMvc) {
 
     @Test
     fun `Show front page`() {

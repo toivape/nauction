@@ -7,12 +7,12 @@ CREATE TABLE IF NOT EXISTS auction_item (
     purchase_date DATE,
     purchase_price NUMERIC(10, 2),
     bidding_end_date DATE NOT NULL,
-    current_price NUMERIC(10, 2) NOT NULL,
+    starting_price NUMERIC(10, 2) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-/*
+
 CREATE TABLE IF NOT EXISTS bid (
    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
    fk_auction_item_id UUID NOT NULL,
@@ -20,6 +20,6 @@ CREATE TABLE IF NOT EXISTS bid (
    bidder_email VARCHAR(255) NOT NULL,
    bid_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
    FOREIGN KEY (fk_auction_item_id) REFERENCES auction_item(id)
-);*/
+);
 
 
