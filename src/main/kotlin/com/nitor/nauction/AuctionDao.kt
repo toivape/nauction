@@ -19,6 +19,7 @@ fun String.toUUID(): UUID = UUID.fromString(this)
 
 data class AuctionItem(
     val id: UUID = UUID.randomUUID(),
+    val externalId: String,
     val description: String,
     val category: String,
     val purchaseDate: LocalDate,
@@ -34,6 +35,7 @@ data class AuctionItem(
     companion object {
         fun toAuctionItem(rs: ResultSet) = AuctionItem(
             id = UUID.fromString(rs.getString("id")),
+            externalId = rs.getString("external_id"),
             description = rs.getString("description"),
             category = rs.getString("category"),
             purchaseDate = rs.getDate("purchase_date").toLocalDate(),
@@ -50,7 +52,7 @@ data class AuctionItem(
 private val log = KotlinLogging.logger {}
 
 @Repository
-class AuctionItemDao(val db: JdbcTemplate) {
+class AuctionDao(val db: JdbcTemplate) {
 
     companion object {
         private val FIND_ALL_ACTIVE = """
@@ -76,15 +78,6 @@ class AuctionItemDao(val db: JdbcTemplate) {
                 ai.id, ai.external_id, ai.description, ai.category, ai.purchase_date, ai.purchase_price, ai.bidding_end_date, ai.created_at, ai.updated_at
             ORDER BY 
                 ai.bidding_end_date ASC         
-        """.trimIndent()
-
-        private val FIND_BY_EXT_ID = """
-            SELECT 
-                id, description, category, purchase_date, purchase_price, bidding_end_date, starting_price, created_at, updated_at
-            FROM 
-                auction_item
-            WHERE 
-                external_id = ?
         """.trimIndent()
 
         private val INSERT_AUCTION = """
@@ -116,23 +109,21 @@ class AuctionItemDao(val db: JdbcTemplate) {
             GROUP BY 
                 ai.id, ai.external_id, ai.description, ai.category, ai.purchase_date, ai.purchase_price, ai.bidding_end_date, ai.created_at, ai.updated_at
         """.trimIndent()
+
+        private val CREATE_BID = """INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)"""
     }
 
     fun findAllOpen() = db.query(FIND_ALL_ACTIVE) { rs, _ -> toAuctionItem(rs) }
 
-    fun findByExternalId(id: String): AuctionItem? = runCatching {
-        // Throws exception if no result is found
-        db.queryForObject(FIND_BY_EXT_ID, { rs, _ -> toAuctionItem(rs) }, id)
-    }.getOrNull()
-
-    fun getItem(id: String): AuctionItem? = runCatching {
+    fun findById(id: String): AuctionItem? = runCatching {
         db.queryForObject(GET_ITEM, { rs, _ -> toAuctionItem(rs) }, id.toUUID())
     }.getOrNull()
 
-    fun create(item: NewAuctionItem):Either<Exception, Unit> = try {
+    fun addAuctionItem(item: NewAuctionItem):Either<Exception, Unit> = try {
+        val id = UUID.randomUUID()
        db.update(
             INSERT_AUCTION,
-            UUID.randomUUID(),
+            id,
             item.id,
             item.description,
             item.category,
@@ -140,6 +131,9 @@ class AuctionItemDao(val db: JdbcTemplate) {
             item.purchasePrice,
             item.startingPrice
         )
+
+        log.info { "Created auction item ($id): $item" }
+
         Unit.right()
     } catch (e: DuplicateKeyException){
         val error = "Can't create auction item. Item already exists with external id ${item.id}."
@@ -149,4 +143,5 @@ class AuctionItemDao(val db: JdbcTemplate) {
         log.error(e) { "Failed to create auction item: $item" }
         Exception("Failed to add new auction item $item").left()
     }
+
 }

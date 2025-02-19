@@ -38,14 +38,99 @@
                         <strong>Bidding End Date:</strong> <span th:text="${item.biddingEndDate}"/><br>
                         <strong>Current Price:</strong> <span th:text="${item.currentPrice}"/>€<br>
                     </p>
-                    <a href="#" class="btn btn-primary">Bid</a>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                            th:data-bs-itemdescription="${item.description}"
+                            th:data-bs-itemid="${item.id}">
+                        Bid
+                    </button>
                 </div>
             </div>
         </div>
     </div> <!-- end of row -->
 
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Make a bid</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="hidden" id="item-id" value="TODO"/>
+                    <div class="mb-3">
+                        <strong id="item-description"></strong>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bid-amount" class="col-form-label">Bid</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="bid-amount" name="bidAmount" aria-describedby="inputGroupPrepend" required>
+                            <span class="input-group-text" id="inputGroupPrepend">€</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="submit-bid" class="btn btn-primary">Bid</button>
+            </div>
+        </div>
+    </div>
+</div> <!-- end of modal -->
+
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+    const exampleModal = document.getElementById('exampleModal')
+    exampleModal.addEventListener('show.bs.modal', function (event) {
+        // Button that triggered the modal. Extract model info from its data-bs-* attributes.
+        const button = event.relatedTarget
+
+        // Get auction item and related bids from server
+        // If there are no earlier bids then show the starting price as the bid (can not be changed)
+
+        // Update the modal's content.
+        const modalItemId = exampleModal.querySelector('#item-id')
+        modalItemId.value = button.getAttribute('data-bs-itemid')
+
+        const modalItemDescription = exampleModal.querySelector('#item-description')
+        modalItemDescription.textContent = button.getAttribute('data-bs-itemdescription')
+    })
+
+    document.getElementById('submit-bid').addEventListener('click', function () {
+        const itemIdInput = document.getElementById('item-id');
+        console.log("item-id input: " + itemIdInput);
+        const itemId = itemIdInput.value;
+        const bidAmountInput = document.getElementById('bid-amount');
+        console.log("bid-amount input: " + bidAmountInput);
+        const bidAmount = bidAmountInput.value;
+
+        fetch(`/api/auctionitems/${itemId}/bid`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ amount: bidAmount })
+        })
+            .then(response => {
+                if (response.status === 201) {
+                    alert('Bid successfully placed!');
+                    // Optionally, close the modal
+                    const modal = bootstrap.Modal.getInstance(exampleModal);
+                    modal.hide();
+                } else {
+                    // TODO: Show returned error message in alert box
+                    alert('Failed to place bid.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while placing the bid.');
+            });
+    });
+</script>
 </body>
 </html>
