@@ -64,7 +64,7 @@ class ApiControllerTest (
     fun `User makes a bid as a first bidder`() {
         val auctionItemId = "01951f4a-48ac-7c5f-8db1-1ef9efc5e10d"
         val bidRequest = BidRequest(amount = 1, lastBidId = "")
-        mvc.post("/api/auctionitems/$auctionItemId/bid") {
+        mvc.post("/api/auctionitems/$auctionItemId/bids") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(bidRequest)
         }.andExpect {
@@ -93,6 +93,36 @@ class ApiControllerTest (
     @Test
     fun `Auction item not found`(){
         mvc.get("/api/auctionitems/01951e70-fd92-78b3-92ab-d2f92e0586ba")
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    fun `Get the latest bid of auction item`(){
+        mvc.get("/api/auctionitems/d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515/lastbid")
+            .andDo{ print() }
+            .andExpect {
+                status { isOk() }
+                content { string(Matchers.containsString(",\"currentPrice\":275.00")) }
+                content { string(Matchers.containsString("\"lastBidId\":\"cf9e1c37-3647-4ad4-9539-23f592a32597\"")) }
+            }
+    }
+
+    @Test
+    fun `Get the latest bid of auction item when there are no bids`(){
+        mvc.get("/api/auctionitems/4c36b5ec-eebc-4881-8e18-edc9c84a0b49/lastbid")
+            .andDo{ print() }
+            .andExpect {
+                status { isOk() }
+                content { string(Matchers.containsString(",\"currentPrice\":25.00")) }
+                content { string(Matchers.containsString("\"lastBidId\":\"\"")) }
+            }
+    }
+
+    @Test
+    fun `Get the latest bid for non-existing auction item`(){
+        mvc.get("/api/auctionitems/01951e70-fd92-78b3-92ab-d2f92e0586ba/lastbid")
             .andExpect {
                 status { isNotFound() }
             }

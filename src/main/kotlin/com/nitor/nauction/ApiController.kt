@@ -67,7 +67,7 @@ class ApiController(val auctionDao: AuctionDao, val bidService: BidService) {
         }
     }
 
-    @PostMapping("/api/auctionitems/{auctionItemId}/bid")
+    @PostMapping("/api/auctionitems/{auctionItemId}/bids")
     fun bid(@PathVariable auctionItemId: String, @Valid @RequestBody bid: BidRequest/* TODO: user @AuthenticationPrincipal user: UserDetails */): ResponseEntity<Any> {
         val dummyUser = "bob.the.builder@nitor.com"
         log.info { "Bid $bid on auction item $auctionItemId by user $dummyUser" }
@@ -83,6 +83,14 @@ class ApiController(val auctionDao: AuctionDao, val bidService: BidService) {
     @GetMapping("/api/auctionitems/{id}")
     fun getAuctionItem(@PathVariable id: String): ResponseEntity<AuctionItem> {
         return auctionDao.findById(id)?.let {
+            ResponseEntity(it, HttpStatus.OK)
+        } ?: ResponseEntity(HttpStatus.NOT_FOUND)
+    }
+
+    @GetMapping("/api/auctionitems/{id}/lastbid")
+    fun getLastBid(@PathVariable id: String): ResponseEntity<LastBid> {
+        return bidService.getLastBid(id)?.let {
+            log.info { "Last bid for auction item $id: $it" }
             ResponseEntity(it, HttpStatus.OK)
         } ?: ResponseEntity(HttpStatus.NOT_FOUND)
     }

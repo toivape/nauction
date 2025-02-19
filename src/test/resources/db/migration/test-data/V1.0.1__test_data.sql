@@ -10,17 +10,17 @@ INSERT INTO auction_item (id, external_id, description, category, purchase_date,
 
 
 INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALUES
-    ('75467def-b8cf-44dd-89a6-9fc0aa1a010f','b030b21b-73f9-40ff-8518-4a45f2c9b769', '5.00', 'bider1@nitor.com','2025-02-16 13:30:00'),
-    ('23c2869e-c8b3-4b72-b019-b457c1ad413c','b030b21b-73f9-40ff-8518-4a45f2c9b769', '5.00', 'bider2@nitor.com','2025-02-16 13:31:00'),
-    ('adaf2c80-7a00-4bd1-8afc-e89e09bf010a','b030b21b-73f9-40ff-8518-4a45f2c9b769', '5.00', 'bider3@nitor.com','2025-02-16 13:32:00'),
-    ('307a50ac-1feb-4aa4-8ea9-2f93fb7cf9f3','b030b21b-73f9-40ff-8518-4a45f2c9b769', '5.00', 'bider2@nitor.com','2025-02-16 13:33:00'),
-    ('7f0c311d-2f02-4562-a5e6-254908568f8b','b030b21b-73f9-40ff-8518-4a45f2c9b769', '5.00', 'bider1@nitor.com','2025-02-16 13:34:00'),
+    ('75467def-b8cf-44dd-89a6-9fc0aa1a010f','b030b21b-73f9-40ff-8518-4a45f2c9b769', '5.00', 'bidder1@nitor.com','2025-02-16 13:30:00'),
+    ('23c2869e-c8b3-4b72-b019-b457c1ad413c','b030b21b-73f9-40ff-8518-4a45f2c9b769', '5.00', 'bidder2@nitor.com','2025-02-16 13:31:00'),
+    ('adaf2c80-7a00-4bd1-8afc-e89e09bf010a','b030b21b-73f9-40ff-8518-4a45f2c9b769', '5.00', 'bidder3@nitor.com','2025-02-16 13:32:00'),
+    ('307a50ac-1feb-4aa4-8ea9-2f93fb7cf9f3','b030b21b-73f9-40ff-8518-4a45f2c9b769', '5.00', 'bidder2@nitor.com','2025-02-16 13:33:00'),
+    ('7f0c311d-2f02-4562-a5e6-254908568f8b','b030b21b-73f9-40ff-8518-4a45f2c9b769', '5.00', 'bidder1@nitor.com','2025-02-16 13:34:00'),
 
-    ('04ee6fa5-b429-4aec-81d4-73af0310548e','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bider1@nitor.com','2025-02-16 13:30:00'),
-    ('8fc96a91-aa08-41a9-9c60-4edd25efa89c','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bider2@nitor.com','2025-02-16 13:31:00'),
-    ('a0ad096e-78a6-4ff6-b798-cda6579f7b50','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bider3@nitor.com','2025-02-16 13:32:00'),
-    ('e4a693bb-2ce5-4c3b-9b46-0bec98e06c79','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bider2@nitor.com','2025-02-16 13:33:00'),
-    ('cf9e1c37-3647-4ad4-9539-23f592a32597','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bider1@nitor.com','2025-02-16 13:34:00')
+    ('04ee6fa5-b429-4aec-81d4-73af0310548e','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bidder1@nitor.com','2025-02-16 13:30:00'),
+    ('8fc96a91-aa08-41a9-9c60-4edd25efa89c','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bidder2@nitor.com','2025-02-16 13:31:00'),
+    ('a0ad096e-78a6-4ff6-b798-cda6579f7b50','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bidder3@nitor.com','2025-02-16 13:32:00'),
+    ('e4a693bb-2ce5-4c3b-9b46-0bec98e06c79','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bidder2@nitor.com','2025-02-16 13:33:00'),
+    ('cf9e1c37-3647-4ad4-9539-23f592a32597','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bidder1@nitor.com','2025-02-16 13:34:00')
 
 
 

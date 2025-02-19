@@ -61,14 +61,21 @@
             <div class="modal-body">
                 <form>
                     <input type="hidden" id="item-id" value="TODO"/>
-                    <div class="mb-3">
-                        <strong id="item-description"></strong>
-                    </div>
-                    <div class="mb-3">
-                        <label for="bid-amount" class="col-form-label">Bid</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="bid-amount" name="bidAmount" aria-describedby="inputGroupPrepend" required>
-                            <span class="input-group-text" id="inputGroupPrepend">€</span>
+                    <input type="hidden" id="last-bid-id" value="TODO"/>
+                    <div class="card">
+
+                        <div class="card-body">
+                            <h5 class="card-title" id="item-description"></h5>
+                            <p class="card-text">
+                                <strong>Latest bid:</strong> <span id="last-bid"></span>€<br>
+                                <strong>Last bidder:</strong> <span id="last-bidder"></span><br>
+                                <strong>Current Price:</strong> <span id="bid-current-price"></span>€<br>
+                            </p>
+                            <label for="bid-amount" class="col-form-label">Your Bid</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="bid-amount" name="bidAmount" aria-describedby="inputGroupPrepend" required>
+                                <span class="input-group-text" id="inputGroupPrepend">€</span>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -89,12 +96,34 @@
         // Button that triggered the modal. Extract model info from its data-bs-* attributes.
         const button = event.relatedTarget
 
+        // Set item id to a hidden input field
+        const itemId = button.getAttribute('data-bs-itemid')
+        const modalItemId = exampleModal.querySelector('#item-id')
+        modalItemId.value = itemId
+
         // Get auction item and related bids from server
         // If there are no earlier bids then show the starting price as the bid (can not be changed)
 
-        // Update the modal's content.
-        const modalItemId = exampleModal.querySelector('#item-id')
-        modalItemId.value = button.getAttribute('data-bs-itemid')
+        fetch(`/api/auctionitems/${itemId}/lastbid`)
+            .then(response => response.json())
+            .then(data => {
+                const lastBidIdInput = document.getElementById('last-bid-id');
+                lastBidIdInput.value = data.lastBidId;
+
+                const lastBidInput = document.getElementById('last-bid');
+                lastBidInput.innerText = data.lastBidAmount;
+
+                const lastBidderInput = document.getElementById('last-bidder');
+                lastBidderInput.innerText = data.lastBidder;
+
+                const currentPriceInput = document.getElementById('bid-current-price');
+                currentPriceInput.innerText = data.currentPrice;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while fetching the auction item.');
+            });
+
 
         const modalItemDescription = exampleModal.querySelector('#item-description')
         modalItemDescription.textContent = button.getAttribute('data-bs-itemdescription')
@@ -108,12 +137,16 @@
         console.log("bid-amount input: " + bidAmountInput);
         const bidAmount = bidAmountInput.value;
 
+        const lastBidIdInput = document.getElementById('last-bid-id');
+        console.log("last-bid-id input: " + lastBidIdInput);
+        const lastBidId = lastBidIdInput.value;
+
         fetch(`/api/auctionitems/${itemId}/bid`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ amount: bidAmount })
+            body: JSON.stringify({ amount: bidAmount, lastBidId: lastBidId })
         })
             .then(response => {
                 if (response.status === 201) {

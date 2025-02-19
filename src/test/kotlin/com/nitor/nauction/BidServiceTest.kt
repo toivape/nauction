@@ -3,6 +3,8 @@ package com.nitor.nauction
 import io.kotest.assertions.arrow.core.shouldBeLeft
 import io.kotest.assertions.arrow.core.shouldBeRight
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -69,6 +71,35 @@ class BidServiceTest {
         bidDao.findByAuctionItemId(auctionItemId).apply {
             shouldHaveAtLeastSize(6)
             last().bidPrice.shouldBe(BigDecimal("10.00"))
+        }
+    }
+
+    @Test
+    fun `should return null when auction item not found`() {
+        bidService.getLastBid("non-existent-id").shouldBeNull()
+    }
+
+    @Test
+    fun `should return last bid details when bids exist`() {
+        val auctionItemId = "b030b21b-73f9-40ff-8518-4a45f2c9b769"
+        bidService.getLastBid(auctionItemId).apply {
+            shouldNotBeNull()
+            auctionItemId shouldBe auctionItemId
+            lastBidId shouldBe "7f0c311d-2f02-4562-a5e6-254908568f8b"
+            itemDescription shouldBe "Apple iPhone 15 Pro Max 512 Gt -puhelin, sinititaani (MU7F3)"
+            currentPrice shouldBe BigDecimal("175.00")
+        }
+    }
+
+    @Test
+    fun `should return last bid details with empty last bid id when no bids exist`() {
+        val auctionItemId = "76bce495-219d-4632-a0bb-3e2977b7ae83"
+        bidService.getLastBid(auctionItemId).apply {
+            shouldNotBeNull()
+            auctionItemId shouldBe auctionItemId
+            lastBidId shouldBe ""
+            itemDescription shouldBe "Apple 96 W USB-C-virtalähde (MX0J2)"
+            currentPrice shouldBe BigDecimal("7.00")
         }
     }
 }
