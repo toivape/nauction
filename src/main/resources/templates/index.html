@@ -38,7 +38,7 @@
                         <strong>Bidding End Date:</strong> <span th:text="${item.biddingEndDate}"/><br>
                         <strong>Current Price:</strong> <span th:text="${item.currentPrice}"/>€<br>
                     </p>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myBidModal"
                             th:data-bs-itemid="${item.id}">
                         Bid
                     </button>
@@ -50,15 +50,15 @@
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="myBidModal" tabindex="-1" aria-labelledby="myBidModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Make a bid</h5>
+                <h5 class="modal-title" id="myBidModalLabel">Make a bid</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form class="needs-validation" id="bid-form" novalidate>
                     <input type="hidden" id="item-id" value="TODO"/>
                     <input type="hidden" id="last-bid-id" value="TODO"/>
                     <div class="card">
@@ -74,9 +74,12 @@
                                 <strong>Current Price:</strong> €<span id="bid-current-price"></span><br>
                             </p>
                             <label for="bid-amount" class="col-form-label">Your Bid</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="bid-amount" name="bidAmount" aria-describedby="inputGroupPrepend" required>
+                            <div class="input-group has-validation">
+                                <input type="number" min="1" max="100" step="1" class="form-control" id="bid-amount" name="bidAmount" aria-describedby="inputGroupPrepend" required>
                                 <span class="input-group-text" id="inputGroupPrepend">€</span>
+                                <div class="invalid-feedback">
+                                    Please enter a valid bid amount.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -93,23 +96,23 @@
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script>
-    const exampleModal = document.getElementById('exampleModal')
-    exampleModal.addEventListener('show.bs.modal', function (event) {
+    const myBidModal = document.getElementById('myBidModal')
+    myBidModal.addEventListener('show.bs.modal', function (event) {
         // Get latest bid info for the item and show it in the modal
+
+        const errorAlert = myBidModal.querySelector('#error-alert');
+        errorAlert.textContent = '';
+        errorAlert.style.display = 'none';
 
         // Button that triggered the modal. Extract auctionItemId from its data-bs-* attributes.
         const button = event.relatedTarget
 
         // Set item id to a hidden input field
         const auctionItemId = button.getAttribute('data-bs-itemid')
-        const modalItemId = exampleModal.querySelector('#item-id')
+        const modalItemId = myBidModal.querySelector('#item-id')
         modalItemId.value = auctionItemId
 
-        const errorAlert = exampleModal.querySelector('#error-alert');
-        errorAlert.textContent = '';
-        errorAlert.style.display = 'none';
-
-        const bidAmountInput = exampleModal.querySelector('#bid-amount');
+        const bidAmountInput = myBidModal.querySelector('#bid-amount');
         bidAmountInput.value = '';
 
         // Get auction item and related bids from server
@@ -125,31 +128,40 @@
             })
             .then(response => response.json())
             .then(data => {
-                const lastBidIdInput = exampleModal.querySelector('#last-bid-id');
+                const lastBidIdInput = myBidModal.querySelector('#last-bid-id');
                 lastBidIdInput.value = data.lastBidId;
 
-                const modalItemDescription = exampleModal.querySelector('#item-description')
+                const modalItemDescription = myBidModal.querySelector('#item-description')
                 modalItemDescription.textContent = data.itemDescription;
 
-                const lastBidInput = exampleModal.querySelector('#last-bid');
+                const lastBidInput = myBidModal.querySelector('#last-bid');
                 lastBidInput.innerText = data.lastBidAmount ? '€' + data.lastBidAmount: '-';
 
-                const lastBidderInput = exampleModal.querySelector('#last-bidder');
+                const lastBidderInput = myBidModal.querySelector('#last-bidder');
                 lastBidderInput.innerText = data.lastBidder ? data.lastBidder : '-';
 
-                const currentPriceInput = exampleModal.querySelector('#bid-current-price');
+                const currentPriceInput = myBidModal.querySelector('#bid-current-price');
                 currentPriceInput.innerText = data.currentPrice;
             })
             .catch(error => {
-                console.error('Failed to fetch latest bid:', error);
-                const errorAlert = document.getElementById('error-alert');
-                errorAlert.textContent = 'Failed to fetch latest bid. Please try again later.';
-                errorAlert.style.display = 'block';
+                console.error('Failed to fetch latest bid: ' + error.message, error);
+                showError({ error: error.message || 'Failed to fetch latest bid. Please try again later.' });
             });
     })
 
-    document.getElementById('submit-bid').addEventListener('click', function () {
-        // Sumbit new bid
+    document.getElementById('submit-bid').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const bidForm = document.getElementById('bid-form');
+        if (!bidForm.checkValidity()) {
+            bidForm.classList.add('was-validated');
+            return;
+        }
+
+        submitBid();
+    });
+
+    function submitBid() {
         const itemIdInput = document.getElementById('item-id');
         const auctionItemId = itemIdInput.value;
         const bidAmountInput = document.getElementById('bid-amount');
@@ -164,28 +176,30 @@
             },
             body: JSON.stringify({ amount: bidAmount, lastBidId: lastBidId })
         })
-            .then(response => {
-                if (response.status === 201) {
-                    // Optionally, close the modal
-                    const modal = bootstrap.Modal.getInstance(exampleModal);
-                    modal.hide();
-                } else {
-                    console.error('Bid request failed with status ' + response.status + ': ', response);
-                    return response.json().then(errorData => {
-                        console.error('Error response:', errorData);
-                        const errorAlert = document.getElementById('error-alert');
-                        errorAlert.textContent = errorData.error || 'An error occurred while placing the bid. Please try again later.';
-                        errorAlert.style.display = 'block';
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                const errorAlert = document.getElementById('error-alert');
-                errorAlert.textContent = 'An error occurred while placing the bid. Please try again later.';
-                errorAlert.style.display = 'block';
-            });
-    });
+            .then(handleResponse)
+            .catch(handleError);
+    }
+
+    function handleResponse(response) {
+        if (response.status === 201) {
+            const modal = bootstrap.Modal.getInstance(myBidModal);
+            modal.hide();
+        } else {
+            return response.json().then(showError);
+        }
+    }
+
+    function handleError(error) {
+        console.error('Error:', error);
+        showError({ error: error.message || 'An error occurred while placing the bid. Please try again later.' });
+    }
+
+    function showError(errorData) {
+        console.error('Error response:', errorData);
+        const errorAlert = document.getElementById('error-alert');
+        errorAlert.textContent = errorData.error;
+        errorAlert.style.display = 'block';
+    }
 </script>
 </body>
 </html>

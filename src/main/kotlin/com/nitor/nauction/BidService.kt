@@ -15,6 +15,8 @@ data class LastBid (
     val currentPrice: BigDecimal,
 )
 
+class ConcurrentBidException(message: String) : Exception(message)
+
 @Service
 class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao) {
 
@@ -36,12 +38,12 @@ class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao)
 
         // If last bid is empty then existing bid list must be empty
         if (existingBids.isNotEmpty() && lastBidId.isEmpty()){
-            return Exception("Last bid id is not the last bid id").left()
+            return ConcurrentBidException("This is no longer the first bid").left()
         }
 
         // Check that last bid id is still the last bid id
         if (existingBids.isNotEmpty() && lastBidId != existingBids.last().id){
-            return Exception("Last bid id is not the last bid id").left()
+            return ConcurrentBidException("Other user has made a simultaneous bid").left()
         }
 
         return bidDao.addBid(auctionItemId, bidderEmail, bidAmount)

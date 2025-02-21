@@ -49,7 +49,7 @@ class BidServiceTest {
         val auctionItemId = "b030b21b-73f9-40ff-8518-4a45f2c9b769" // Ensure this ID exists in your test data
         bidService.addBid(auctionItemId, "test@example.com", BigDecimal.TEN, "").apply {
             shouldBeLeft()
-            value.message.shouldBe("Last bid id is not the last bid id")
+            value.message.shouldBe("This is no longer the first bid")
         }
     }
 
@@ -59,7 +59,7 @@ class BidServiceTest {
         val lastBidId = "75467def-b8cf-44dd-89a6-9fc0aa1a010f"
         bidService.addBid(auctionItemId, "test@example.com", BigDecimal.TEN, lastBidId).apply {
             shouldBeLeft()
-            value.message.shouldBe("Last bid id is not the last bid id")
+            value.message.shouldBe("Other user has made a simultaneous bid")
         }
     }
 

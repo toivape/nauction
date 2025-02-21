@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
 
 data class ErrorResponse(val error: String)
 
@@ -55,7 +54,13 @@ private val log = KotlinLogging.logger {}
 class ApiController(val auctionDao: AuctionDao, val bidService: BidService) {
 
     @PostMapping("/api/auctionitems")
-    fun createAuctionItem(@Valid @RequestBody item: NewAuctionItem): ResponseEntity<Any> {
+    fun createAuctionItem(@Valid @RequestBody item: NewAuctionItem, bindingResult: BindingResult): ResponseEntity<Any> {
+
+        if (bindingResult.hasErrors()) {
+            val errorMessage = bindingResult.allErrors.joinToString { it.defaultMessage.orEmpty() }
+            return ResponseEntity(ErrorResponse(errorMessage), HttpStatus.BAD_REQUEST)
+        }
+
         return when (val result = auctionDao.addAuctionItem(item)) {
             is Either.Right -> ResponseEntity(Unit, HttpStatus.CREATED)
             is Either.Left -> {
@@ -83,8 +88,13 @@ class ApiController(val auctionDao: AuctionDao, val bidService: BidService) {
         return when (val result = bidService.addBid(auctionItemId, dummyUser, BigDecimal(bid.amount!!), bid.lastBidId)) {
             is Either.Right -> ResponseEntity(Unit, HttpStatus.CREATED)
             is Either.Left -> {
-                val errorMessage = result.value.message ?: "Unknown error"
-                ResponseEntity(ErrorResponse(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
+                when(result.value) {
+                    is ConcurrentBidException -> ResponseEntity(ErrorResponse("Other user has placed a bid"), HttpStatus.BAD_REQUEST)
+                    else -> {
+                        val errorMessage = result.value.message ?: "Unknown error"
+                        ResponseEntity(ErrorResponse(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
+                    }
+                }
             }
         }
     }
