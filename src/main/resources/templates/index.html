@@ -27,7 +27,7 @@
 
     <div class="row">
         <!-- Example Item -->
-        <div th:each="item: ${items}" class="col-md-4 mb-4">
+        <div th:each="item: ${items}" class="col-md-4 mb-4" th:id="'item_' + ${item.id}">
             <div class="card">
 
                 <div class="card-body">
@@ -38,7 +38,9 @@
                         <strong>Bidding End Date:</strong> <span th:text="${item.biddingEndDate}"/><br>
                         <strong>Current Price:</strong> <span th:text="${item.currentPrice}"/>€<br>
                     </p>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myBidModal"
+                    <button type="button" class="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#myBidModal"
                             th:data-bs-itemid="${item.id}">
                         Bid
                     </button>
@@ -78,7 +80,7 @@
                                 <input type="number" min="1" max="100" step="1" class="form-control" id="bid-amount" name="bidAmount" aria-describedby="inputGroupPrepend" required>
                                 <span class="input-group-text" id="inputGroupPrepend">€</span>
                                 <div class="invalid-feedback">
-                                    Please enter a valid bid amount.
+                                    Please enter a valid bid amount (1-100€).
                                 </div>
                             </div>
                         </div>
