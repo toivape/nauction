@@ -38,7 +38,7 @@
                         <strong>Bidding End Date:</strong> <span th:text="${item.biddingEndDate}"/><br>
                         <strong>Current Price:</strong> <span th:text="${item.currentPrice}"/>€<br>
                     </p>
-                    <button type="button" class="btn btn-primary"
+                    <button type="button" class="btn btn-primary bid-button"
                             data-bs-toggle="modal"
                             data-bs-target="#myBidModal"
                             th:data-bs-itemid="${item.id}">
@@ -98,52 +98,70 @@
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script>
-    const myBidModal = document.getElementById('myBidModal')
-    myBidModal.addEventListener('show.bs.modal', function (event) {
-        // Get latest bid info for the item and show it in the modal
+    document.getElementById('myBidModal').addEventListener('hidden.bs.modal', function () {
+        // Reset the modal content
+        const modalElement = document.getElementById('myBidModal');
+        modalElement.querySelector('#item-id').value = '';
+        modalElement.querySelector('#last-bid-id').value = '';
+        modalElement.querySelector('#item-description').textContent = '';
+        modalElement.querySelector('#last-bid').innerText = '';
+        modalElement.querySelector('#last-bidder').innerText = '';
+        modalElement.querySelector('#bid-current-price').innerText = '';
 
-        const errorAlert = myBidModal.querySelector('#error-alert');
+        // Reset the bid amount input
+        const bidAmountInput = document.getElementById('bid-amount');
+        bidAmountInput.value = '';
+        bidAmountInput.disabled = false;
+
+        // Reset the error alert
+        const errorAlert = modalElement.querySelector('#error-alert');
         errorAlert.textContent = '';
         errorAlert.style.display = 'none';
 
+        // Reset the form validation state
+        const bidForm = modalElement.querySelector('#bid-form');
+        bidForm.classList.remove('was-validated');
+        bidForm.reset();
+    });
+
+    document.getElementById('myBidModal').addEventListener('show.bs.modal', function (event) {
+        // Get latest bid info for the item and show it in the modal
+
         // Button that triggered the modal. Extract auctionItemId from its data-bs-* attributes.
         const button = event.relatedTarget
-
-        // Set item id to a hidden input field
         const auctionItemId = button.getAttribute('data-bs-itemid')
-        const modalItemId = myBidModal.querySelector('#item-id')
-        modalItemId.value = auctionItemId
+        const modalElement = document.getElementById('myBidModal');
 
-        const bidAmountInput = myBidModal.querySelector('#bid-amount');
-        bidAmountInput.value = '';
+        getLatestBid(auctionItemId)
+            .then(bidData => {
+                // Update the modal's content with bid data
+                const modalItemId = modalElement.querySelector('#item-id');
+                modalItemId.value = auctionItemId;
 
-        // Get auction item and related bids from server
-        // If there are no earlier bids then show the starting price as the bid (can not be changed)
+                const lastBidIdInput = modalElement.querySelector('#last-bid-id');
+                lastBidIdInput.value = bidData.lastBidId;
 
-        fetch(`/api/auctionitems/${auctionItemId}/latestbid`)
-            .then(response => {
-                if (!response.ok) {
-                    console.error('Failed to fetch latest bid with id :' + auctionItemId, response);
-                    throw new Error('Failed to fetch latest bid: ' + response.status);
+                const modalItemDescription = modalElement.querySelector('#item-description');
+                modalItemDescription.textContent = bidData.itemDescription;
+
+                const lastBidInput = modalElement.querySelector('#last-bid');
+                lastBidInput.innerText = bidData.lastBidAmount ? '€' + bidData.lastBidAmount : '-';
+
+                const lastBidderInput = modalElement.querySelector('#last-bidder');
+                lastBidderInput.innerText = bidData.lastBidder ? bidData.lastBidder : '-';
+
+                const currentPriceInput = modalElement.querySelector('#bid-current-price');
+                currentPriceInput.innerText = bidData.currentPrice;
+
+                if (!bidData.lastBidId){
+                    console.log("First to bid.lastBidId: " + bidData.lastBidId);
+                    // If user is first to bid, set the bid amount to the current price
+                    const bidAmountInput = document.getElementById('bid-amount');
+                    bidAmountInput.value = bidData.currentPrice;
+                    bidAmountInput.disabled = true;
+                    const submitButton = document.getElementById("submit-bid");
+                    submitButton.innerText = "I am first to bid!";
                 }
-                return response;
-            })
-            .then(response => response.json())
-            .then(data => {
-                const lastBidIdInput = myBidModal.querySelector('#last-bid-id');
-                lastBidIdInput.value = data.lastBidId;
-
-                const modalItemDescription = myBidModal.querySelector('#item-description')
-                modalItemDescription.textContent = data.itemDescription;
-
-                const lastBidInput = myBidModal.querySelector('#last-bid');
-                lastBidInput.innerText = data.lastBidAmount ? '€' + data.lastBidAmount: '-';
-
-                const lastBidderInput = myBidModal.querySelector('#last-bidder');
-                lastBidderInput.innerText = data.lastBidder ? data.lastBidder : '-';
-
-                const currentPriceInput = myBidModal.querySelector('#bid-current-price');
-                currentPriceInput.innerText = data.currentPrice;
             })
             .catch(error => {
                 console.error('Failed to fetch latest bid: ' + error.message, error);
@@ -201,6 +219,19 @@
         const errorAlert = document.getElementById('error-alert');
         errorAlert.textContent = errorData.error;
         errorAlert.style.display = 'block';
+    }
+
+    function getLatestBid(auctionItemId) {
+        return fetch(`/api/auctionitems/${auctionItemId}/latestbid`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        console.error('Failed to fetch latest bid with id :' + auctionItemId, errorData);
+                        throw new Error(errorData.error || 'Failed to fetch latest bid: ' + response.status);
+                    });
+                }
+                return response.json();
+            });
     }
 </script>
 </body>
