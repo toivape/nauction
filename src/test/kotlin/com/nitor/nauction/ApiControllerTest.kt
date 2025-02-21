@@ -15,6 +15,7 @@ import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.web.servlet.function.RequestPredicates.contentType
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -67,9 +68,11 @@ class ApiControllerTest (
         mvc.post("/api/auctionitems/$auctionItemId/bids") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(bidRequest)
-        }.andExpect {
-            status { isCreated() }
         }
+            .andDo { print() }
+            .andExpect {
+                status { isCreated() }
+            }
 
         // Make sure the bid is in the database
         bidDao.findByAuctionItemId(auctionItemId).apply {
@@ -78,6 +81,33 @@ class ApiControllerTest (
                 first().bidPrice shouldBe BigDecimal("42.00")
             }
         }
+    }
+
+    @Test
+    fun `New bid request has invalid auction item id`(){
+        val auctionItemId = "01951f4a-48ac-7c5f-8db1-1ef9efc5e10d-bad"
+        val bidRequest = BidRequest(amount = 1, lastBidId = "")
+        mvc.post("/api/auctionitems/$auctionItemId/bids") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(bidRequest)
+        }.andExpect {
+            status { isBadRequest() }
+        }
+    }
+
+    @Test
+    fun `Users makes a bid with invalid data`(){
+        val auctionItemId = "01951f4a-48ac-7c5f-8db1-1ef9efc5e10d"
+        val bidRequest = BidRequest(amount = null, lastBidId = "invalid-uuid")
+        println("PID REQUEST: " + objectMapper.writeValueAsString(bidRequest))
+        mvc.post("/api/auctionitems/$auctionItemId/bids") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(bidRequest)
+        }
+            .andDo { print() }
+            .andExpect {
+                status { isBadRequest() }
+            }
     }
 
     @Test
@@ -99,8 +129,17 @@ class ApiControllerTest (
     }
 
     @Test
+    fun `Get auction item with invalid id`(){
+        mvc.get("/api/auctionitems/bad-uuid")
+            .andDo{ print() }
+            .andExpect {
+                status { isBadRequest() }
+            }
+    }
+
+    @Test
     fun `Get the latest bid of auction item`(){
-        mvc.get("/api/auctionitems/d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515/lastbid")
+        mvc.get("/api/auctionitems/d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515/latestbid")
             .andDo{ print() }
             .andExpect {
                 status { isOk() }
@@ -111,7 +150,7 @@ class ApiControllerTest (
 
     @Test
     fun `Get the latest bid of auction item when there are no bids`(){
-        mvc.get("/api/auctionitems/4c36b5ec-eebc-4881-8e18-edc9c84a0b49/lastbid")
+        mvc.get("/api/auctionitems/4c36b5ec-eebc-4881-8e18-edc9c84a0b49/latestbid")
             .andDo{ print() }
             .andExpect {
                 status { isOk() }
@@ -122,9 +161,18 @@ class ApiControllerTest (
 
     @Test
     fun `Get the latest bid for non-existing auction item`(){
-        mvc.get("/api/auctionitems/01951e70-fd92-78b3-92ab-d2f92e0586ba/lastbid")
+        mvc.get("/api/auctionitems/01951e70-fd92-78b3-92ab-d2f92e0586ba/latestbid")
             .andExpect {
                 status { isNotFound() }
+            }
+    }
+
+    @Test
+    fun `Get the latest bid with invalid auction item`(){
+        mvc.get("/api/auctionitems/bad-uuid/latestbid")
+            .andDo{ print() }
+            .andExpect {
+                status { isBadRequest() }
             }
     }
 }

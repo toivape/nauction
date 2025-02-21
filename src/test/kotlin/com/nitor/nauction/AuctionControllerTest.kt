@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.get
 class AuctionControllerTest(@Autowired private val mvc: MockMvc) {
 
     @Test
-    fun `Show front page`() {
+    fun `Show front page with auction items`() {
         mvc.get("/")
             .andDo { print() }
             .andExpect {

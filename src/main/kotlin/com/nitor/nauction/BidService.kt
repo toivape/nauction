@@ -9,7 +9,7 @@ import java.math.BigDecimal
 data class LastBid (
     val auctionItemId: String,
     val lastBidId: String,
-    val lastBidAmount: BigDecimal,
+    val lastBidAmount: BigDecimal?,
     val lastBidder: String,
     val itemDescription: String,
     val currentPrice: BigDecimal,
@@ -49,11 +49,14 @@ class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao)
 
     fun getLastBid(auctionItemId: String): LastBid? {
         val auctionItem = auctionDao.findById(auctionItemId) ?: return null
-        val bids = bidDao.findByAuctionItemId(auctionItemId)
-        val lastBid = bids.lastOrNull()
-        if (lastBid == null){
-            return LastBid(auctionItemId, "", auctionItem.startingPrice, "", auctionItem.description, auctionItem.currentPrice)
-        }
-        return LastBid(auctionItemId, lastBid.id, lastBid.bidPrice, lastBid.bidderEmail, auctionItem.description, auctionItem.currentPrice)
+        val lastBid = bidDao.findByAuctionItemId(auctionItemId).lastOrNull()
+        return LastBid(
+            auctionItemId,
+            lastBid?.id ?: "",
+            lastBid?.bidPrice, // ?: auctionItem.startingPrice,
+            lastBid?.bidderEmail ?: "",
+            auctionItem.description,
+            auctionItem.currentPrice
+        )
     }
 }

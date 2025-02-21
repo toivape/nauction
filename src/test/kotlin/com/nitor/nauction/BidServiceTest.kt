@@ -86,18 +86,20 @@ class BidServiceTest {
             shouldNotBeNull()
             auctionItemId shouldBe auctionItemId
             lastBidId shouldBe "7f0c311d-2f02-4562-a5e6-254908568f8b"
+            lastBidAmount shouldBe BigDecimal("5.00")
             itemDescription shouldBe "Apple iPhone 15 Pro Max 512 Gt -puhelin, sinititaani (MU7F3)"
             currentPrice shouldBe BigDecimal("175.00")
         }
     }
 
     @Test
-    fun `should return last bid details with empty last bid id when no bids exist`() {
+    fun `should return only auction item details if there are no bids`() {
         val auctionItemId = "76bce495-219d-4632-a0bb-3e2977b7ae83"
         bidService.getLastBid(auctionItemId).apply {
             shouldNotBeNull()
             auctionItemId shouldBe auctionItemId
             lastBidId shouldBe ""
+            lastBidAmount shouldBe null
             itemDescription shouldBe "Apple 96 W USB-C-virtalähde (MX0J2)"
             currentPrice shouldBe BigDecimal("7.00")
         }
