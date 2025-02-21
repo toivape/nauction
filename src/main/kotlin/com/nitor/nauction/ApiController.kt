@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -54,13 +53,7 @@ private val log = KotlinLogging.logger {}
 class ApiController(val auctionDao: AuctionDao, val bidService: BidService) {
 
     @PostMapping("/api/auctionitems")
-    fun createAuctionItem(@Valid @RequestBody item: NewAuctionItem, bindingResult: BindingResult): ResponseEntity<Any> {
-
-        if (bindingResult.hasErrors()) {
-            val errorMessage = bindingResult.allErrors.joinToString { it.defaultMessage.orEmpty() }
-            return ResponseEntity(ErrorResponse(errorMessage), HttpStatus.BAD_REQUEST)
-        }
-
+    fun createAuctionItem(@Valid @RequestBody item: NewAuctionItem): ResponseEntity<Any> {
         return when (val result = auctionDao.addAuctionItem(item)) {
             is Either.Right -> ResponseEntity(Unit, HttpStatus.CREATED)
             is Either.Left -> {
@@ -76,20 +69,23 @@ class ApiController(val auctionDao: AuctionDao, val bidService: BidService) {
     }
 
     @PostMapping("/api/auctionitems/{auctionItemId}/bids")
-    fun bid(@PathVariable @ValidUUID auctionItemId: String, @Valid @RequestBody bid: BidRequest, bindingResult: BindingResult/* TODO: user @AuthenticationPrincipal user: UserDetails */): ResponseEntity<Any> {
+    fun bid(
+        @PathVariable @ValidUUID auctionItemId: String,
+        @Valid @RequestBody bid: BidRequest/* TODO: user @AuthenticationPrincipal user: UserDetails */
+    ): ResponseEntity<Any> {
         val dummyUser = "bob.the.builder@nitor.com"
         log.info { "New bid $bid on auction item $auctionItemId by user $dummyUser" }
 
-        if (bindingResult.hasErrors()) {
-            val errorMessage = bindingResult.allErrors.joinToString { it.defaultMessage.orEmpty() }
-            return ResponseEntity(ErrorResponse(errorMessage), HttpStatus.BAD_REQUEST)
-        }
-
-        return when (val result = bidService.addBid(auctionItemId, dummyUser, BigDecimal(bid.amount!!), bid.lastBidId)) {
+        return when (val result =
+            bidService.addBid(auctionItemId, dummyUser, BigDecimal(bid.amount!!), bid.lastBidId)) {
             is Either.Right -> ResponseEntity(Unit, HttpStatus.CREATED)
             is Either.Left -> {
-                when(result.value) {
-                    is ConcurrentBidException -> ResponseEntity(ErrorResponse("Other user has placed a bid"), HttpStatus.BAD_REQUEST)
+                when (result.value) {
+                    is ConcurrentBidException -> ResponseEntity(
+                        ErrorResponse("Other user has placed a bid"),
+                        HttpStatus.BAD_REQUEST
+                    )
+
                     else -> {
                         val errorMessage = result.value.message ?: "Unknown error"
                         ResponseEntity(ErrorResponse(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)

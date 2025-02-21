@@ -4,7 +4,7 @@ import jakarta.validation.Constraint
 import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
 import jakarta.validation.Payload
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.KClass
 
 @Constraint(validatedBy = [ValidUUIDValidator::class])
@@ -20,7 +20,7 @@ annotation class ValidUUID(
 class ValidUUIDValidator : ConstraintValidator<ValidUUID, String> {
     override fun isValid(uuid: String, context: ConstraintValidatorContext?): Boolean {
         if (uuid.isNullOrBlank()) return true
-        return  runCatching { UUID.fromString(uuid) }.isSuccess
+        return runCatching { UUID.fromString(uuid) }.isSuccess
     }
 }
 

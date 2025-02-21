@@ -110,7 +110,8 @@ class AuctionDao(val db: JdbcTemplate) {
                 ai.id, ai.external_id, ai.description, ai.category, ai.purchase_date, ai.purchase_price, ai.bidding_end_date, ai.created_at, ai.updated_at
         """.trimIndent()
 
-        private val CREATE_BID = """INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)"""
+        private val CREATE_BID =
+            """INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)"""
     }
 
     fun findAllOpen() = db.query(FIND_ALL_ACTIVE) { rs, _ -> toAuctionItem(rs) }
@@ -119,9 +120,9 @@ class AuctionDao(val db: JdbcTemplate) {
         db.queryForObject(GET_ITEM, { rs, _ -> toAuctionItem(rs) }, id.toUUID())
     }.getOrNull()
 
-    fun addAuctionItem(item: NewAuctionItem):Either<Exception, Unit> = try {
+    fun addAuctionItem(item: NewAuctionItem): Either<Exception, Unit> = try {
         val id = UUID.randomUUID()
-       db.update(
+        db.update(
             INSERT_AUCTION,
             id,
             item.id,
@@ -135,11 +136,11 @@ class AuctionDao(val db: JdbcTemplate) {
         log.info { "Created auction item ($id): $item" }
 
         Unit.right()
-    } catch (e: DuplicateKeyException){
+    } catch (e: DuplicateKeyException) {
         val error = "Can't create auction item. Item already exists with external id ${item.id}."
         log.error(e) { error }
         Exception(error).left()
-    } catch (e: DataAccessException){
+    } catch (e: DataAccessException) {
         log.error(e) { "Failed to create auction item: $item" }
         Exception("Failed to add new auction item $item").left()
     }
