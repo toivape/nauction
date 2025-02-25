@@ -6,7 +6,9 @@ INSERT INTO auction_item (id, external_id, description, category, purchase_date,
        ('f94a1a05-aca6-4957-9b31-b27e3ba06198','b7fc8a7a-4960-4d9a-8be1-3153d5ead480','Apple Magic Mouse 2 langaton laserhiiri, tähtiharmaa, MRME2', 'Computer accessories', '2021-06-02', '108.9',  NOW() + interval '2' month, 5),
        ('ac63acfa-35bc-4ea4-aa2a-47470515596c','80a1a610-e73f-4637-9ca8-10d816f7f860','Belkin Power Bank 5K -varavirtalähde magneetilla, 5000 mAh, valkoinen', 'Phone accessories', '2024-06-06', '59.99',  NOW() + interval '4' month, 5),
        ('ad0bc19f-79a6-45b7-978a-1b17fed94087','b4db23e1-e219-4775-b89b-7761bc63fdab','Lenovo ThinkVision T27p 27" 4K UHD', 'Display', '2022-09-28', '529.99',  NOW() + interval '3' month, 125),
-       ('4c36b5ec-eebc-4881-8e18-edc9c84a0b49','54fea623-fdbe-47e0-8404-be9cffa59cf2','Sony WF-1000XM5 langattomat vastamelunappikuulokkeet, hopea', 'Headphones', '2023-08-28', '329.99',NOW() - interval '1' month, 25);
+       ('4c36b5ec-eebc-4881-8e18-edc9c84a0b49','54fea623-fdbe-47e0-8404-be9cffa59cf2','Sony WF-1000XM5 langattomat vastamelunappikuulokkeet, hopea', 'Headphones', '2023-08-28', '329.99',NOW() - interval '1' month, 25),
+       ('271aebdf-b53d-4748-8dce-a67f6ece3399','9e02e9a1-878c-41fd-a3ea-4402ba681618','Apple AirPods Pro, hopea', 'Headphones', '2023-08-28', '249.99',NOW() - interval '1' month, 25),
+       ('b2ce636c-9d81-4ba4-bab8-f2ffaa91293c','3f0cf2ab-d2bd-4b29-8bff-c6eb4b3af503','LG 42 OLED evo C4 (799 EUR)', 'Display', '2023-08-28', '799.00',NOW() + interval '1' month, 200);
 
 
 INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALUES
@@ -23,5 +25,11 @@ INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALU
     ('cf9e1c37-3647-4ad4-9539-23f592a32597','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', 5, 'bidder1@nitor.com','2025-02-16 13:34:00'),
 
     ('0fc7e0eb-a38d-4d73-88d8-916ee53fb1f7','4c36b5ec-eebc-4881-8e18-edc9c84a0b49', 2, 'bidder4@nitor.com','2025-02-18 13:30:00'),
-    ('5c2b7360-a938-4448-be2b-74e018bb0c28','4c36b5ec-eebc-4881-8e18-edc9c84a0b49', 8, 'bidder5@nitor.com','2025-02-18 13:31:00')
+    ('5c2b7360-a938-4448-be2b-74e018bb0c28','4c36b5ec-eebc-4881-8e18-edc9c84a0b49', 8, 'bidder5@nitor.com','2025-02-18 13:31:00'),
 
+    ('ab2ef16a-e5b5-4d41-8d29-61f8dbe0da5e','271aebdf-b53d-4748-8dce-a67f6ece3399', 20, 'bidder6@nitor.com','2025-01-18 12:30:00'),
+    ('f40d0d08-8f37-4e60-bb65-54207c98e015','271aebdf-b53d-4748-8dce-a67f6ece3399', 6, 'bidder7@nitor.com','2025-01-18 12:31:00'),
+
+    ('0bbe0bec-6cb5-43c4-be65-c34315fc03ae','b2ce636c-9d81-4ba4-bab8-f2ffaa91293c', 3, 'bidder6@nitor.com','2025-01-20 12:30:00'),
+    ('6f99dfef-d190-4607-a6ac-c4c261e23271','b2ce636c-9d81-4ba4-bab8-f2ffaa91293c', 3, 'bidder7@nitor.com','2025-01-20 12:31:00'),
+    ('e72dd49c-8d94-4fd8-8d9a-423b31b0857b','b2ce636c-9d81-4ba4-bab8-f2ffaa91293c', 3, 'bidder3@nitor.com','2025-01-20 12:33:00');

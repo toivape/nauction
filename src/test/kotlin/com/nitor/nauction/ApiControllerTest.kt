@@ -97,7 +97,7 @@ class ApiControllerTest(
 
     @Test
     fun `User places a bid when there are existing bids`() {
-        val auctionItemId = "4c36b5ec-eebc-4881-8e18-edc9c84a0b49"
+        val auctionItemId = "b2ce636c-9d81-4ba4-bab8-f2ffaa91293c"
         val latestBid = bidService.getLatestBid(auctionItemId)!!
         val bidRequest = BidRequest(amount = 9, lastBidId = latestBid.lastBidId)
         val expectedPrice = latestBid.currentPrice + bidRequest.amount!!
@@ -114,9 +114,24 @@ class ApiControllerTest(
 
         // Make sure the bid is in the database
         bidDao.findByAuctionItemId(auctionItemId).apply {
-            shouldHaveAtLeastSize(3)
+            shouldHaveAtLeastSize(4)
             last().bidPrice shouldBe bidRequest.amount
         }
+    }
+
+    @Test
+    fun `User is not able to bid on an expired auction item`() {
+        val auctionItemId = "271aebdf-b53d-4748-8dce-a67f6ece3399"
+        val bidRequest = BidRequest(amount = 5, lastBidId = "f40d0d08-8f37-4e60-bb65-54207c98e015")
+        mvc.post("/api/auctionitems/$auctionItemId/bids") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(bidRequest)
+        }
+            .andDo { print() }
+            .andExpect {
+                status { isBadRequest() }
+                content { string(Matchers.containsString("Auction item is expired")) }
+            }
     }
 
     @Test

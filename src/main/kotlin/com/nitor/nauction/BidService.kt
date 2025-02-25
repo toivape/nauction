@@ -18,6 +18,8 @@ data class LatestBid(
 
 class ConcurrentBidException(message: String) : Exception(message)
 
+class ExpiredException(message: String) : Exception(message)
+
 @Service
 class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao) {
 
@@ -32,6 +34,11 @@ class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao)
         val auctionItem = auctionDao.findById(auctionItemId)
         if (auctionItem == null) {
             return Exception("Auction item not found").left()
+        }
+
+        // Auction item must be open (not expired)
+        if (auctionItem.isExpired()) {
+            return ExpiredException("Auction item is expired").left()
         }
 
         // If this is first bid then price is starting price of auction item

@@ -47,6 +47,8 @@ data class AuctionItem(
             totalBids = rs.getInt("total_bids"),
         )
     }
+
+    fun isExpired() = biddingEndDate.isBefore(LocalDate.now())
 }
 
 private val log = KotlinLogging.logger {}

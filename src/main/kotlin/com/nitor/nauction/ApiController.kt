@@ -85,6 +85,10 @@ class ApiController(val auctionDao: AuctionDao, val bidService: BidService) {
                         ErrorResponse("Other user has placed a bid"),
                         HttpStatus.BAD_REQUEST
                     )
+                    is ExpiredException -> ResponseEntity(
+                        ErrorResponse("Auction item is expired"),
+                        HttpStatus.BAD_REQUEST
+                    )
                     else -> {
                         val errorMessage = result.value.message ?: "Unknown error"
                         ResponseEntity(ErrorResponse(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
