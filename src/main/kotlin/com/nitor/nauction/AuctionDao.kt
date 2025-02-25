@@ -25,11 +25,11 @@ data class AuctionItem(
     val purchaseDate: LocalDate,
     val purchasePrice: BigDecimal,
     val biddingEndDate: LocalDate,
-    val startingPrice: BigDecimal,
+    val startingPrice: Int,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now(),
-    val totalBids: BigDecimal,
-    val currentPrice: BigDecimal = startingPrice + totalBids
+    val totalBids: Int,
+    val currentPrice: Int = startingPrice + totalBids
 ) {
 
     companion object {
@@ -41,10 +41,10 @@ data class AuctionItem(
             purchaseDate = rs.getDate("purchase_date").toLocalDate(),
             purchasePrice = rs.getBigDecimal("purchase_price"),
             biddingEndDate = rs.getDate("bidding_end_date").toLocalDate(),
-            startingPrice = rs.getBigDecimal("starting_price"),
+            startingPrice = rs.getInt("starting_price"),
             createdAt = rs.getTimestamp("created_at").toLocalDateTime(),
             updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
-            totalBids = rs.getBigDecimal("total_bids"),
+            totalBids = rs.getInt("total_bids"),
         )
     }
 }
@@ -110,8 +110,6 @@ class AuctionDao(val db: JdbcTemplate) {
                 ai.id, ai.external_id, ai.description, ai.category, ai.purchase_date, ai.purchase_price, ai.bidding_end_date, ai.created_at, ai.updated_at
         """.trimIndent()
 
-        private val CREATE_BID =
-            """INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)"""
     }
 
     fun findAllOpen() = db.query(FIND_ALL_ACTIVE) { rs, _ -> toAuctionItem(rs) }

@@ -10,10 +10,10 @@ import java.math.BigDecimal
 data class LatestBid(
     val auctionItemId: String,
     val lastBidId: String,
-    val lastBidAmount: BigDecimal?,
+    val lastBidAmount: Int?,
     val lastBidder: String,
     val itemDescription: String,
-    val currentPrice: BigDecimal,
+    val currentPrice: Int,
 )
 
 class ConcurrentBidException(message: String) : Exception(message)
@@ -25,7 +25,7 @@ class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao)
     fun addBid(
         auctionItemId: String,
         bidderEmail: String,
-        amount: BigDecimal,
+        amount: Int,
         lastBidId: String
     ): Either<Exception, LatestBid> {
         // Auction item must exist

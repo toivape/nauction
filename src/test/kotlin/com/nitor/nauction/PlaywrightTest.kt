@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.ActiveProfiles
-import java.math.BigDecimal
+
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -97,14 +97,15 @@ class PlaywrightTest(@Autowired val bidService: BidService) {
     fun `Make a bid`() {
         playwright!!.chromium().launch().use { browser ->
             val page = browser.openAuctionItemModal()
-            page.placeBid("42")
+            val bidAmount = 42
+            page.placeBid(bidAmount.toString())
 
             // Wait for the modal to be hidden
             page.waitForSelector("#myBidModal", WaitForSelectorOptions().setState(WaitForSelectorState.HIDDEN))
 
             // Check that bid is found in database
             val bid = bidService.getLatestBid(AUCTION_ITEM_ID)!!
-            bid.lastBidAmount shouldBe "42.00".toBigDecimal()
+            bid.lastBidAmount shouldBe bidAmount
         }
     }
 
@@ -115,7 +116,7 @@ class PlaywrightTest(@Autowired val bidService: BidService) {
 
             // Make a simultaneous bid
             val latestBid = bidService.getLatestBid(AUCTION_ITEM_ID)
-            bidService.addBid(AUCTION_ITEM_ID, "test.bidder.bob@nitor.com", BigDecimal.TEN, latestBid!!.lastBidId).apply {
+            bidService.addBid(AUCTION_ITEM_ID, "test.bidder.bob@nitor.com", 10, latestBid!!.lastBidId).apply {
                 shouldBeRight()
             }
 
@@ -150,9 +151,10 @@ class PlaywrightTest(@Autowired val bidService: BidService) {
             val page = browser.openAuctionItemModal()
 
             val latestBid = bidService.getLatestBid(AUCTION_ITEM_ID)!!
-            val expectedPrice = latestBid.currentPrice.add("11".toBigDecimal())
+            val bidAmount = 11
+            val expectedPrice = latestBid.currentPrice + bidAmount
 
-            page.placeBid("11")
+            page.placeBid(bidAmount.toString())
 
             // Wait for the modal to be hidden
             page.waitForSelector("#myBidModal", WaitForSelectorOptions().setState(WaitForSelectorState.HIDDEN))

@@ -32,8 +32,8 @@ data class NewAuctionItem(
     var purchaseDate: LocalDate,
     @field:NotNull(message = "purchasePrice is mandatory")
     var purchasePrice: BigDecimal,
-    @field:NotNull(message = "biddingStartingPrice is mandatory")
-    var startingPrice: BigDecimal
+    @field:NotNull(message = "startingPrice is mandatory")
+    var startingPrice: Int
 )
 
 data class BidRequest(
@@ -77,7 +77,7 @@ class ApiController(val auctionDao: AuctionDao, val bidService: BidService) {
         log.info { "New bid $bid on auction item $auctionItemId by user $dummyUser" }
 
         return when (val result: Either<Exception, LatestBid> =
-            bidService.addBid(auctionItemId, dummyUser, BigDecimal(bid.amount!!), bid.lastBidId)) {
+            bidService.addBid(auctionItemId, dummyUser, bid.amount!!, bid.lastBidId)) {
             is Either.Right -> ResponseEntity(result.value, HttpStatus.CREATED)
             is Either.Left -> {
                 when (result.value) {

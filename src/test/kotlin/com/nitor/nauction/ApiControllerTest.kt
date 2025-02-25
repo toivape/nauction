@@ -36,7 +36,7 @@ class ApiControllerTest(
         category = "Phone",
         purchaseDate = LocalDate.of(2023, 2, 13),
         purchasePrice = BigDecimal("1149.00"),
-        startingPrice = BigDecimal("100.00")
+        startingPrice = 100
     )
 
     private fun postItem(item: NewAuctionItem) =
@@ -72,7 +72,7 @@ class ApiControllerTest(
         postItem(newItem1).andDo { print() }.andExpect { status { isBadRequest() } }
     }
 
-    @Sql(statements = ["INSERT INTO auction_item (id, external_id, description, category, purchase_date, purchase_price, bidding_end_date, starting_price) VALUES ('01951f4a-48ac-7c5f-8db1-1ef9efc5e10d','01951f4a-48ac-7ece-acac-f7c443787795','Ubiquiti UniFi 7 Pro -WiFi-tukiasema', 'Network', '2023-10-06', '249.99',  NOW() + interval '3' month, '42.00')"])
+    @Sql(statements = ["INSERT INTO auction_item (id, external_id, description, category, purchase_date, purchase_price, bidding_end_date, starting_price) VALUES ('01951f4a-48ac-7c5f-8db1-1ef9efc5e10d','01951f4a-48ac-7ece-acac-f7c443787795','Ubiquiti UniFi 7 Pro -WiFi-tukiasema', 'Network', '2023-10-06', '249.99',  NOW() + interval '3' month, 42)"])
     @Test
     fun `User makes a bid as a first bidder`() {
         val auctionItemId = "01951f4a-48ac-7c5f-8db1-1ef9efc5e10d"
@@ -90,17 +90,17 @@ class ApiControllerTest(
         bidDao.findByAuctionItemId(auctionItemId).apply {
             withClue("There should be one bid for auction item $auctionItemId") {
                 size shouldBe 1
-                first().bidPrice shouldBe BigDecimal("42.00")
+                first().bidPrice shouldBe 42
             }
         }
     }
 
     @Test
-    fun `User makes a bid when there are existing bids`() {
+    fun `User places a bid when there are existing bids`() {
         val auctionItemId = "4c36b5ec-eebc-4881-8e18-edc9c84a0b49"
         val latestBid = bidService.getLatestBid(auctionItemId)!!
-        val bidRequest = BidRequest(amount = 10, lastBidId = latestBid.lastBidId)
-        val expectedPrice = latestBid.currentPrice!!.add(bidRequest.amount!!.toBigDecimal())
+        val bidRequest = BidRequest(amount = 9, lastBidId = latestBid.lastBidId)
+        val expectedPrice = latestBid.currentPrice + bidRequest.amount!!
 
         mvc.post("/api/auctionitems/$auctionItemId/bids") {
             contentType = MediaType.APPLICATION_JSON
@@ -115,8 +115,7 @@ class ApiControllerTest(
         // Make sure the bid is in the database
         bidDao.findByAuctionItemId(auctionItemId).apply {
             shouldHaveAtLeastSize(3)
-            val expectedBidPrice = bidRequest.amount!!.toBigDecimal().setScale(2)
-            last().bidPrice.setScale(2) shouldBe expectedBidPrice
+            last().bidPrice shouldBe bidRequest.amount
         }
     }
 
@@ -153,7 +152,7 @@ class ApiControllerTest(
             .andDo { print() }
             .andExpect {
                 status { isOk() }
-                content { string(Matchers.containsString(",\"currentPrice\":275.00")) }
+                content { string(Matchers.containsString(",\"currentPrice\":275")) }
             }
     }
 
@@ -180,19 +179,19 @@ class ApiControllerTest(
             .andDo { print() }
             .andExpect {
                 status { isOk() }
-                content { string(Matchers.containsString(",\"currentPrice\":275.00")) }
+                content { string(Matchers.containsString(",\"currentPrice\":275")) }
                 content { string(Matchers.containsString("\"lastBidId\":\"cf9e1c37-3647-4ad4-9539-23f592a32597\"")) }
             }
     }
 
-    @Sql(statements = ["INSERT INTO auction_item (id, external_id, description, category, purchase_date, purchase_price, bidding_end_date, starting_price) VALUES ('8e61bd74-b109-4bac-8ad3-552e3d3451df','8c031a7a-6c3f-411c-85b6-35a97a61da6b','Apple MagSafe -laturi 25 W (1 m) (MX6X3)', 'Phone accessories', '2024-06-06', '49.99',  NOW() + interval '3' month, '12.00')"])
+    @Sql(statements = ["INSERT INTO auction_item (id, external_id, description, category, purchase_date, purchase_price, bidding_end_date, starting_price) VALUES ('8e61bd74-b109-4bac-8ad3-552e3d3451df','8c031a7a-6c3f-411c-85b6-35a97a61da6b','Apple MagSafe -laturi 25 W (1 m) (MX6X3)', 'Phone accessories', '2024-06-06', '49.99',  NOW() + interval '3' month, 12)"])
     @Test
     fun `Get the latest bid of auction item when there are no bids`() {
         mvc.get("/api/auctionitems/8e61bd74-b109-4bac-8ad3-552e3d3451df/latestbid")
             .andDo { print() }
             .andExpect {
                 status { isOk() }
-                content { string(Matchers.containsString(",\"currentPrice\":12.00")) }
+                content { string(Matchers.containsString(",\"currentPrice\":12")) }
                 content { string(Matchers.containsString("\"lastBidId\":\"\"")) }
             }
     }

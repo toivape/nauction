@@ -9,7 +9,6 @@ import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.query
 import org.springframework.stereotype.Repository
-import java.math.BigDecimal
 import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.util.*
@@ -17,7 +16,7 @@ import java.util.*
 data class Bid(
     val id: String,
     val auctionItemId: String,
-    val bidPrice: BigDecimal,
+    val bidPrice: Int,
     val bidderEmail: String,
     val bidTime: LocalDateTime
 ) {
@@ -25,7 +24,7 @@ data class Bid(
         fun toBid(rs: ResultSet) = Bid(
             id = rs.getString("id"),
             auctionItemId = rs.getString("fk_auction_item_id"),
-            bidPrice = rs.getBigDecimal("bid_price"),
+            bidPrice = rs.getInt("bid_price"),
             bidderEmail = rs.getString("bidder_email"),
             bidTime = rs.getTimestamp("bid_time").toLocalDateTime()
         )
@@ -64,7 +63,7 @@ class BidDao(val db: JdbcTemplate) {
     fun findByAuctionItemId(auctionItemId: String): List<Bid> =
         db.query(FIND_BIDS, auctionItemId) { rs, _ -> toBid(rs) }
 
-    fun addBid(auctionItemId: String, bidderEmail: String, amount: BigDecimal): Either<Exception, Unit> = try {
+    fun addBid(auctionItemId: String, bidderEmail: String, amount: Int): Either<Exception, Unit> = try {
         val id = UUID.randomUUID()
         db.update(
             CREATE_BID,

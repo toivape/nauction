@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import java.math.BigDecimal
 import java.util.UUID
 
 @SpringBootTest
@@ -35,7 +34,7 @@ class AuctionDaoTest(@Autowired val dao: AuctionDao) {
     fun `Auction item current price is starting price plus bids`(){
         dao.findById("b030b21b-73f9-40ff-8518-4a45f2c9b769").apply {
             shouldNotBeNull()
-            currentPrice shouldBe BigDecimal("175.00")
+            currentPrice shouldBe 175
         }
     }
 
