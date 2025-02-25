@@ -202,11 +202,16 @@
 
     function handleResponse(response) {
         if (response.status === 201) {
-            const modal = bootstrap.Modal.getInstance(myBidModal);
-            modal.hide();
+            closeModal();
+            location.reload();
         } else {
             return response.json().then(showError);
         }
+    }
+
+    function closeModal() {
+        const modal = bootstrap.Modal.getInstance(myBidModal);
+        modal.hide();
     }
 
     function handleError(error) {
