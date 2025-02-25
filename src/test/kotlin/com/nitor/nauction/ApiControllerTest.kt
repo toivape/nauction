@@ -2,6 +2,7 @@ package com.nitor.nauction
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.hamcrest.Matchers
@@ -25,6 +26,7 @@ class ApiControllerTest(
     @Autowired private val mvc: MockMvc,
     @Autowired private val auctionDao: AuctionDao,
     @Autowired private val bidDao: BidDao,
+    @Autowired private val bidService: BidService,
     @Autowired private val objectMapper: ObjectMapper
 ) {
 
@@ -94,6 +96,31 @@ class ApiControllerTest(
     }
 
     @Test
+    fun `User makes a bid when there are existing bids`() {
+        val auctionItemId = "4c36b5ec-eebc-4881-8e18-edc9c84a0b49"
+        val latestBid = bidService.getLatestBid(auctionItemId)!!
+        val bidRequest = BidRequest(amount = 10, lastBidId = latestBid.lastBidId)
+        val expectedPrice = latestBid.currentPrice!!.add(bidRequest.amount!!.toBigDecimal())
+
+        mvc.post("/api/auctionitems/$auctionItemId/bids") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(bidRequest)
+        }
+            .andDo { print() }
+            .andExpect {
+                status { isCreated() }
+                content { string(Matchers.containsString(",\"currentPrice\":$expectedPrice")) }
+            }
+
+        // Make sure the bid is in the database
+        bidDao.findByAuctionItemId(auctionItemId).apply {
+            shouldHaveAtLeastSize(3)
+            val expectedBidPrice = bidRequest.amount!!.toBigDecimal().setScale(2)
+            last().bidPrice.setScale(2) shouldBe expectedBidPrice
+        }
+    }
+
+    @Test
     fun `New bid request has invalid auction item id`() {
         val auctionItemId = "01951f4a-48ac-7c5f-8db1-1ef9efc5e10d-bad"
         val bidRequest = BidRequest(amount = 1, lastBidId = "")
@@ -158,13 +185,14 @@ class ApiControllerTest(
             }
     }
 
+    @Sql(statements = ["INSERT INTO auction_item (id, external_id, description, category, purchase_date, purchase_price, bidding_end_date, starting_price) VALUES ('8e61bd74-b109-4bac-8ad3-552e3d3451df','8c031a7a-6c3f-411c-85b6-35a97a61da6b','Apple MagSafe -laturi 25 W (1 m) (MX6X3)', 'Phone accessories', '2024-06-06', '49.99',  NOW() + interval '3' month, '12.00')"])
     @Test
     fun `Get the latest bid of auction item when there are no bids`() {
-        mvc.get("/api/auctionitems/4c36b5ec-eebc-4881-8e18-edc9c84a0b49/latestbid")
+        mvc.get("/api/auctionitems/8e61bd74-b109-4bac-8ad3-552e3d3451df/latestbid")
             .andDo { print() }
             .andExpect {
                 status { isOk() }
-                content { string(Matchers.containsString(",\"currentPrice\":25.00")) }
+                content { string(Matchers.containsString(",\"currentPrice\":12.00")) }
                 content { string(Matchers.containsString("\"lastBidId\":\"\"")) }
             }
     }

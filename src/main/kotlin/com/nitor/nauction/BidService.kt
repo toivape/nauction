@@ -2,11 +2,12 @@ package com.nitor.nauction
 
 import arrow.core.Either
 import arrow.core.left
+import arrow.core.right
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 
-data class LastBid(
+data class LatestBid(
     val auctionItemId: String,
     val lastBidId: String,
     val lastBidAmount: BigDecimal?,
@@ -26,7 +27,7 @@ class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao)
         bidderEmail: String,
         amount: BigDecimal,
         lastBidId: String
-    ): Either<Exception, Unit> {
+    ): Either<Exception, LatestBid> {
         // Auction item must exist
         val auctionItem = auctionDao.findById(auctionItemId)
         if (auctionItem == null) {
@@ -51,13 +52,16 @@ class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao)
             return ConcurrentBidException("Other user has made a simultaneous bid").left()
         }
 
-        return bidDao.addBid(auctionItemId, bidderEmail, bidAmount)
+        bidDao.addBid(auctionItemId, bidderEmail, bidAmount)
+
+        val latestBid = getLatestBid(auctionItemId)
+        return latestBid?.right() ?: Exception("Failed to get latest bid").left()
     }
 
-    fun getLastBid(auctionItemId: String): LastBid? {
+    fun getLatestBid(auctionItemId: String): LatestBid? {
         val auctionItem = auctionDao.findById(auctionItemId) ?: return null
         val lastBid = bidDao.findByAuctionItemId(auctionItemId).lastOrNull()
-        return LastBid(
+        return LatestBid(
             auctionItemId,
             lastBid?.id ?: "",
             lastBid?.bidPrice, // ?: auctionItem.startingPrice,

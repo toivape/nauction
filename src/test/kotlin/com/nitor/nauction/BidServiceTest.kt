@@ -76,13 +76,13 @@ class BidServiceTest {
 
     @Test
     fun `should return null when auction item not found`() {
-        bidService.getLastBid("non-existent-id").shouldBeNull()
+        bidService.getLatestBid("non-existent-id").shouldBeNull()
     }
 
     @Test
     fun `should return last bid details when bids exist`() {
         val auctionItemId = "b030b21b-73f9-40ff-8518-4a45f2c9b769"
-        bidService.getLastBid(auctionItemId).apply {
+        bidService.getLatestBid(auctionItemId).apply {
             shouldNotBeNull()
             auctionItemId shouldBe auctionItemId
             lastBidId shouldBe "7f0c311d-2f02-4562-a5e6-254908568f8b"
@@ -95,7 +95,7 @@ class BidServiceTest {
     @Test
     fun `should return only auction item details if there are no bids`() {
         val auctionItemId = "76bce495-219d-4632-a0bb-3e2977b7ae83"
-        bidService.getLastBid(auctionItemId).apply {
+        bidService.getLatestBid(auctionItemId).apply {
             shouldNotBeNull()
             auctionItemId shouldBe auctionItemId
             lastBidId shouldBe ""

@@ -69,23 +69,22 @@ class ApiController(val auctionDao: AuctionDao, val bidService: BidService) {
     }
 
     @PostMapping("/api/auctionitems/{auctionItemId}/bids")
-    fun bid(
+    fun placeBid(
         @PathVariable @ValidUUID auctionItemId: String,
         @Valid @RequestBody bid: BidRequest/* TODO: user @AuthenticationPrincipal user: UserDetails */
     ): ResponseEntity<Any> {
         val dummyUser = "bob.the.builder@nitor.com"
         log.info { "New bid $bid on auction item $auctionItemId by user $dummyUser" }
 
-        return when (val result =
+        return when (val result: Either<Exception, LatestBid> =
             bidService.addBid(auctionItemId, dummyUser, BigDecimal(bid.amount!!), bid.lastBidId)) {
-            is Either.Right -> ResponseEntity(Unit, HttpStatus.CREATED)
+            is Either.Right -> ResponseEntity(result.value, HttpStatus.CREATED)
             is Either.Left -> {
                 when (result.value) {
                     is ConcurrentBidException -> ResponseEntity(
                         ErrorResponse("Other user has placed a bid"),
                         HttpStatus.BAD_REQUEST
                     )
-
                     else -> {
                         val errorMessage = result.value.message ?: "Unknown error"
                         ResponseEntity(ErrorResponse(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
@@ -95,17 +94,17 @@ class ApiController(val auctionDao: AuctionDao, val bidService: BidService) {
         }
     }
 
-    @GetMapping("/api/auctionitems/{id}")
-    fun getAuctionItem(@PathVariable @ValidUUID id: String): ResponseEntity<AuctionItem> {
-        return auctionDao.findById(id)?.let {
+    @GetMapping("/api/auctionitems/{auctionItemId}")
+    fun getAuctionItem(@PathVariable @ValidUUID auctionItemId: String): ResponseEntity<AuctionItem> {
+        return auctionDao.findById(auctionItemId)?.let {
             ResponseEntity(it, HttpStatus.OK)
         } ?: ResponseEntity(HttpStatus.NOT_FOUND)
     }
 
-    @GetMapping("/api/auctionitems/{id}/latestbid")
-    fun getLastBid(@PathVariable @ValidUUID id: String): ResponseEntity<LastBid> {
-        return bidService.getLastBid(id)?.let {
-            log.info { "Latest bid for auction item $id: $it" }
+    @GetMapping("/api/auctionitems/{auctionItemId}/latestbid")
+    fun getLatestBid(@PathVariable @ValidUUID auctionItemId: String): ResponseEntity<LatestBid> {
+        return bidService.getLatestBid(auctionItemId)?.let {
+            log.info { "Latest bid for auction item $auctionItemId: $it" }
             ResponseEntity(it, HttpStatus.OK)
         } ?: ResponseEntity(HttpStatus.NOT_FOUND)
     }

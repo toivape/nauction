@@ -31,6 +31,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("com.microsoft.playwright:playwright:1.50.0")
+
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.8.1")
     testImplementation("io.kotest.extensions:kotest-assertions-arrow:1.4.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

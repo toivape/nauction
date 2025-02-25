@@ -20,7 +20,10 @@ INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALU
     ('8fc96a91-aa08-41a9-9c60-4edd25efa89c','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bidder2@nitor.com','2025-02-16 13:31:00'),
     ('a0ad096e-78a6-4ff6-b798-cda6579f7b50','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bidder3@nitor.com','2025-02-16 13:32:00'),
     ('e4a693bb-2ce5-4c3b-9b46-0bec98e06c79','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bidder2@nitor.com','2025-02-16 13:33:00'),
-    ('cf9e1c37-3647-4ad4-9539-23f592a32597','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bidder1@nitor.com','2025-02-16 13:34:00')
+    ('cf9e1c37-3647-4ad4-9539-23f592a32597','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', '5.00', 'bidder1@nitor.com','2025-02-16 13:34:00'),
+
+    ('0fc7e0eb-a38d-4d73-88d8-916ee53fb1f7','4c36b5ec-eebc-4881-8e18-edc9c84a0b49', '2.00', 'bidder4@nitor.com','2025-02-18 13:30:00'),
+    ('5c2b7360-a938-4448-be2b-74e018bb0c28','4c36b5ec-eebc-4881-8e18-edc9c84a0b49', '8.00', 'bidder5@nitor.com','2025-02-18 13:31:00')
 
 
 
