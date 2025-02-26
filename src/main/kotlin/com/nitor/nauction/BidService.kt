@@ -3,6 +3,7 @@ package com.nitor.nauction
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -19,6 +20,8 @@ data class LatestBid(
 class ConcurrentBidException(message: String) : Exception(message)
 
 class ExpiredException(message: String) : Exception(message)
+
+private val log = KotlinLogging.logger {}
 
 @Service
 class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao) {
@@ -38,6 +41,7 @@ class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao)
 
         // Auction item must be open (not expired)
         if (auctionItem.isExpired()) {
+            log.warn { "User $bidderEmail tried to place bid for expired auction item $auctionItemId" }
             return ExpiredException("Auction item is expired").left()
         }
 
@@ -71,10 +75,21 @@ class BidService(private val bidDao: BidDao, private val auctionDao: AuctionDao)
         return LatestBid(
             auctionItemId,
             lastBid?.id ?: "",
-            lastBid?.bidPrice, // ?: auctionItem.startingPrice,
+            lastBid?.bidPrice,
             lastBid?.bidderEmail ?: "",
             auctionItem.description,
             auctionItem.currentPrice
         )
+    }
+
+    fun renewExpiredAuctions() {
+        val numUpdated = bidDao.renewExpiredAuctions()
+        log.info { "Number of renewed auctions: $numUpdated" }
+    }
+
+    fun exportFinishedAuctions() {
+        log.info { "Exporting finished auctions" }
+        // TODO Find auctions which are expired and have bids, export them to originating system, and mark them exported by settings is_exported = true
+        // TODO Export should go to a separate class which is responsible for exporting
     }
 }

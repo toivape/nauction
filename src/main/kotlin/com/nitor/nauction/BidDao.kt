@@ -58,6 +58,21 @@ class BidDao(val db: JdbcTemplate) {
             VALUES 
             (?, ?, ?, ?, CURRENT_TIMESTAMP)
         """.trimIndent()
+
+        private val RENEW_BID = """
+            UPDATE auction_item ai
+            SET 
+                bidding_end_date = CURRENT_DATE + INTERVAL '30 days',
+                times_renewed = times_renewed + 1,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE 
+                bidding_end_date < CURRENT_DATE
+                AND is_transferred = FALSE
+                AND NOT EXISTS (
+                    SELECT 1 
+                    FROM bid b 
+                    WHERE b.fk_auction_item_id = ai.id
+                )""".trimIndent()
     }
 
     fun findByAuctionItemId(auctionItemId: String): List<Bid> =
@@ -80,4 +95,7 @@ class BidDao(val db: JdbcTemplate) {
         log.error(e) { "Failed to create bid: amount: $amount, bidder: $bidderEmail, auctionItem: $auctionItemId\"" }
         Exception("Failed to add new auction bid").left()
     }
+
+    fun renewExpiredAuctions() = db.update(RENEW_BID)
+
 }

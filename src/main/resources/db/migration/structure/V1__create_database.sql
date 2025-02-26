@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS auction_item (
     purchase_price NUMERIC(10, 2),
     bidding_end_date DATE NOT NULL,
     starting_price INTEGER NOT NULL,
+    times_renewed INTEGER DEFAULT 0,
+    is_transferred BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
