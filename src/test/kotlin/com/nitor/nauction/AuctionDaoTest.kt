@@ -45,4 +45,12 @@ class AuctionDaoTest(@Autowired val dao: AuctionDao) {
             currentPrice shouldBe startingPrice
         }
     }
+
+    @Test
+    fun `List all items for admin view`() {
+        dao.findAllAdmin().apply {
+            shouldHaveAtLeastSize(7)
+            print(this)
+        }
+    }
 }

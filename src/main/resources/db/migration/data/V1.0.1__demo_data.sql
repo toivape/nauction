@@ -20,5 +20,17 @@ INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALU
     ('8fc96a91-aa08-41a9-9c60-4edd25efa89c','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', 5, 'bidder2@nitor.com','2025-02-16 13:31:00'),
     ('a0ad096e-78a6-4ff6-b798-cda6579f7b50','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', 5, 'bidder3@nitor.com','2025-02-16 13:32:00'),
     ('e4a693bb-2ce5-4c3b-9b46-0bec98e06c79','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', 5, 'bidder2@nitor.com','2025-02-16 13:33:00'),
-    ('cf9e1c37-3647-4ad4-9539-23f592a32597','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', 5, 'bidder1@nitor.com','2025-02-16 13:34:00')
+    ('cf9e1c37-3647-4ad4-9539-23f592a32597','d1d018fe-cc1b-4f9c-9d53-bc8f5dd9b515', 5, 'bidder1@nitor.com','2025-02-16 13:34:00');
+
+-- Transferred item
+INSERT INTO auction_item (id, external_id, description, category, purchase_date, purchase_price, bidding_end_date, starting_price, is_transferred) VALUES
+    ('baf6374e-5fb1-4e35-abe5-abb7ff7d0c7a','87abd3b7-02c4-4bd2-9e4a-03721ee5ef81','Satechi USB-C Multi-Port Adapter 4K Gigabit Ethernet V2', 'Computer accessories', '2024-08-28', '44.00',NOW() - interval '1' day, 5, true);
+
+INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALUES
+('66121ea5-ba35-42e9-a237-03674dadd0ce','baf6374e-5fb1-4e35-abe5-abb7ff7d0c7a', 1, 'bidder6@nitor.com','2025-01-20 12:30:00'),
+('ab58a59c-2c1b-4666-bd2e-ce41cfe3b73d','baf6374e-5fb1-4e35-abe5-abb7ff7d0c7a', 1, 'bidder7@nitor.com','2025-01-20 12:31:00');
+
+-- Renewed item
+INSERT INTO auction_item (id, external_id, description, category, purchase_date, purchase_price, bidding_end_date, starting_price, times_renewed) VALUES
+    ('4dca57db-23ca-4a8e-a63b-20b6f4d2a910','a5231a6a-2452-46e8-af6b-c49bbd4bec4f','PRO PACK-Reppu (vihreä)', 'Computer bag', '2022-08-28', '149.00',NOW() + interval '10' day, 10, 3);
 

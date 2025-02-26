@@ -8,7 +8,8 @@ INSERT INTO auction_item (id, external_id, description, category, purchase_date,
        ('ad0bc19f-79a6-45b7-978a-1b17fed94087','b4db23e1-e219-4775-b89b-7761bc63fdab','Lenovo ThinkVision T27p 27" 4K UHD', 'Display', '2022-09-28', '529.99',  NOW() + interval '3' month, 125),
        ('4c36b5ec-eebc-4881-8e18-edc9c84a0b49','54fea623-fdbe-47e0-8404-be9cffa59cf2','Sony WF-1000XM5 langattomat vastamelunappikuulokkeet, hopea', 'Headphones', '2023-08-28', '329.99',NOW() - interval '1' month, 25),
        ('271aebdf-b53d-4748-8dce-a67f6ece3399','9e02e9a1-878c-41fd-a3ea-4402ba681618','Apple AirPods Pro, hopea', 'Headphones', '2023-08-28', '249.99',NOW() - interval '1' month, 25),
-       ('b2ce636c-9d81-4ba4-bab8-f2ffaa91293c','3f0cf2ab-d2bd-4b29-8bff-c6eb4b3af503','LG 42 OLED evo C4 (799 EUR)', 'Display', '2023-08-28', '799.00',NOW() + interval '1' month, 200);
+       ('b2ce636c-9d81-4ba4-bab8-f2ffaa91293c','3f0cf2ab-d2bd-4b29-8bff-c6eb4b3af503','LG 42 OLED evo C4 (799 EUR)', 'Display', '2023-08-28', '799.00',NOW() + interval '1' month, 200)
+;
 
 
 INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALUES
@@ -33,3 +34,17 @@ INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALU
     ('0bbe0bec-6cb5-43c4-be65-c34315fc03ae','b2ce636c-9d81-4ba4-bab8-f2ffaa91293c', 3, 'bidder6@nitor.com','2025-01-20 12:30:00'),
     ('6f99dfef-d190-4607-a6ac-c4c261e23271','b2ce636c-9d81-4ba4-bab8-f2ffaa91293c', 3, 'bidder7@nitor.com','2025-01-20 12:31:00'),
     ('e72dd49c-8d94-4fd8-8d9a-423b31b0857b','b2ce636c-9d81-4ba4-bab8-f2ffaa91293c', 3, 'bidder3@nitor.com','2025-01-20 12:33:00');
+
+
+-- Transferred item
+INSERT INTO auction_item (id, external_id, description, category, purchase_date, purchase_price, bidding_end_date, starting_price, is_transferred) VALUES
+('baf6374e-5fb1-4e35-abe5-abb7ff7d0c7a','87abd3b7-02c4-4bd2-9e4a-03721ee5ef81','Satechi USB-C Multi-Port Adapter 4K Gigabit Ethernet V2', 'Computer accessories', '2024-08-28', '44.00',NOW() - interval '1' day, 5, true);
+
+INSERT INTO bid (id, fk_auction_item_id, bid_price, bidder_email, bid_time) VALUES
+('66121ea5-ba35-42e9-a237-03674dadd0ce','baf6374e-5fb1-4e35-abe5-abb7ff7d0c7a', 1, 'bidder6@nitor.com','2025-01-20 12:30:00'),
+('ab58a59c-2c1b-4666-bd2e-ce41cfe3b73d','baf6374e-5fb1-4e35-abe5-abb7ff7d0c7a', 1, 'bidder7@nitor.com','2025-01-20 12:31:00');
+
+-- Renewed item
+INSERT INTO auction_item (id, external_id, description, category, purchase_date, purchase_price, bidding_end_date, starting_price, times_renewed) VALUES
+('4dca57db-23ca-4a8e-a63b-20b6f4d2a910','a5231a6a-2452-46e8-af6b-c49bbd4bec4f','PRO PACK-Reppu (vihreä)', 'Computer bag', '2022-08-28', '149.00',NOW() + interval '10' day, 10, 3);
+

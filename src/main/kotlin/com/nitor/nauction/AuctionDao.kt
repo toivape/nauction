@@ -3,6 +3,7 @@ package com.nitor.nauction
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import com.nitor.nauction.AdminItem.Companion.toAdminItem
 import com.nitor.nauction.AuctionItem.Companion.toAuctionItem
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.dao.DataAccessException
@@ -51,12 +52,50 @@ data class AuctionItem(
     fun isExpired() = biddingEndDate.isBefore(LocalDate.now())
 }
 
+data class AdminItem(
+    val description: String,
+    val biddingEndDate: LocalDate,
+    val timesRenewed: Int,
+    val isTransferred: Boolean,
+    val currentPrice: Int,
+    val numberOfBids: Int
+){
+    companion object {
+        fun toAdminItem(rs: ResultSet) = AdminItem(
+            description = rs.getString("description"),
+            biddingEndDate = rs.getDate("bidding_end_date").toLocalDate(),
+            timesRenewed = rs.getInt("times_renewed"),
+            isTransferred = rs.getBoolean("is_transferred"),
+            currentPrice = rs.getInt("current_price"),
+            numberOfBids = rs.getInt("number_of_bids")
+        )
+    }
+}
+
 private val log = KotlinLogging.logger {}
 
 @Repository
 class AuctionDao(val db: JdbcTemplate) {
 
     companion object {
+        private val FIND_ALL_ADMIN = """
+            SELECT            
+                ai.description,
+                ai.bidding_end_date,
+                ai.times_renewed,
+                ai.is_transferred,
+                COALESCE(SUM(b.bid_price), 0) + ai.starting_price AS current_price,
+                COUNT(b.id) AS number_of_bids
+            FROM 
+                auction_item ai
+            LEFT JOIN 
+                bid b ON ai.id = b.fk_auction_item_id
+            GROUP BY 
+                ai.description, ai.bidding_end_date, ai.times_renewed, ai.is_transferred
+            ORDER BY 
+                ai.bidding_end_date ASC
+        """.trimIndent()
+
         private val FIND_ALL_ACTIVE = """
             SELECT 
                 ai.id,
@@ -81,6 +120,7 @@ class AuctionDao(val db: JdbcTemplate) {
             ORDER BY 
                 ai.bidding_end_date ASC         
         """.trimIndent()
+
 
         private val INSERT_AUCTION = """
            INSERT INTO auction_item 
@@ -115,6 +155,8 @@ class AuctionDao(val db: JdbcTemplate) {
     }
 
     fun findAllOpen() = db.query(FIND_ALL_ACTIVE) { rs, _ -> toAuctionItem(rs) }
+
+    fun findAllAdmin() = db.query(FIND_ALL_ADMIN) { rs, _ -> toAdminItem(rs) }
 
     fun findById(id: String): AuctionItem? = runCatching {
         db.queryForObject(GET_ITEM, { rs, _ -> toAuctionItem(rs) }, id.toUUID())
