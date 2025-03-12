@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    username: ${RDS_USERNAME:sa}
+    password: ${RDS_PASSWORD:passu}
+  h2:
+    console:
+      enabled: false
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
