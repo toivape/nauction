@@ -70,5 +70,5 @@ tasks.register<Test>("integrationTest") {
     }
 
     // Optional: make sure tests run after the regular tests
-    shouldRunAfter(tasks.named("test"))
+    // shouldRunAfter(tasks.named("test"))
 }
