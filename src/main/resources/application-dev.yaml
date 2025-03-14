@@ -1,0 +1,10 @@
+
+# Allow H2 console access
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        # Allow access to h2-console when running in Docker
+        web-allow-others: true
