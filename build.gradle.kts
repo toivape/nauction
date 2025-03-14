@@ -1,3 +1,4 @@
+
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
@@ -47,4 +48,27 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// Define the test task with unit test configuration
+tasks.named<Test>("test") {
+    filter {
+        includeTestsMatching("*Test")
+        excludeTestsMatching("*IntegrationTest")
+    }
+}
+
+// Create a separate task for integration tests
+tasks.register<Test>("integrationTest") {
+    description = "Runs integration tests."
+    group = "verification"
+
+    useJUnitPlatform()
+
+    filter {
+        includeTestsMatching("*IT")
+    }
+
+    // Optional: make sure tests run after the regular tests
+    shouldRunAfter(tasks.named("test"))
 }

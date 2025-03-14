@@ -19,11 +19,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.ActiveProfiles
 
-
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-class PlaywrightTest(@Autowired val bidService: BidService) {
+class PlaywrightIT(@Autowired val bidService: BidService) {
 
     companion object {
         private const val AUCTION_ITEM_ID = "b030b21b-73f9-40ff-8518-4a45f2c9b769"
