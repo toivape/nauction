@@ -6,7 +6,6 @@ import arrow.core.right
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 
 data class LatestBid(
     val auctionItemId: String,
