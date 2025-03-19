@@ -15,6 +15,16 @@ import org.springframework.test.web.servlet.get
 class AdminControllerTest (@Autowired private val mvc: MockMvc) {
 
     @Test
+    fun `Health check is successful`() {
+        mvc.get("/actuator/health")
+            .andDo { print() }
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.status") { value("UP") }
+            }
+    }
+
+    @Test
     fun `Show admin page with auction items`() {
         mvc.get("/admin")
             .andDo { print() }
