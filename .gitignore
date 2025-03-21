@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 .secrets
 task-definition.json
+xxx-*
 
 ### STS ###
 .apt_generated
