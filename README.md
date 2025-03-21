@@ -1,7 +1,7 @@
-# nauction
+# Simple Auction
 
 ## Overview
-nauction is a Kotlin-based project that uses Spring Boot and various other dependencies to create a web application. This project includes features such as data persistence, web interface, and validation.
+Simple Auction is a Kotlin-based project that uses Spring Boot and various other dependencies to create a web application. This project includes features such as data persistence, web interface, and validation.
 
 ## Prerequisites
 - JDK 21
