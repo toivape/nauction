@@ -47,12 +47,36 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Calculate image tag
-        id: image_tag
-        run: echo "image_tag=$(./image-tag.sh)" >> $GITHUB_OUTPUT
+        id: image-tag
+        run: echo "image-tag=$(./image-tag.sh)" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
+        id: build-image
         env:
-          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
+          IMAGE_TAG: ${{ steps.image-tag.outputs.image-tag }}
         run: |
           docker build --platform=linux/amd64 -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .        
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }} --all-tags
+
+      - name: Download task definition
+        id: download-task-definition
+        run: |
+          aws ecs describe-task-definition --task-definition nauction-task --query taskDefinition > task-definition.json
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: nauction
+          task-definition-family: nauction-task
+          task-definition-revision: 3
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: nauction-service-2
+          cluster: NauctionCluster
+          wait-for-service-stability: true
