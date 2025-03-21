@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: Build and Deploy
 
 on:
   push:
@@ -57,24 +57,27 @@ jobs:
         run: |
           docker build --platform=linux/amd64 -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .        
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }} --all-tags
+          echo "image=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
 
       - name: Download task definition
         id: download-task-definition
         run: |
           aws ecs describe-task-definition --task-definition nauction-task --query taskDefinition > task-definition.json
 
+      # Uncomment for local testing
+      #- name: Use mock task definition
+      #  run: |
+      #    cp .github/test-resources/mock-task-definition.json ./task-definition.json
+
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
-        env:
-          IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.image-tag }}
         with:
           task-definition: task-definition.json
           container-name: nauction
           task-definition-family: nauction-task
           task-definition-revision: 3
-          #image: ${{ steps.build-image.outputs.image }}
-          image: ${{ env.IMAGE }}
+          image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
